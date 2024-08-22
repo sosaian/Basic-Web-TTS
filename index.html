@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TTS FOR THE WIN</title>
+    <link rel="shortcut icon" href="text-to-speech.svg" type="image/x-icon">
+    <style>
+        body
+        {
+            background-color: #121212;
+            color: #f2f2f2;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+        }
+
+        textarea
+        {
+            width: 300px;
+            height: 100px;
+            resize: none;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            border: 1px solid #f2f2f2;
+            background-color: #121212;
+            color: #f2f2f2;
+        }
+
+        button
+        {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4a480a;
+            color: #f2f2f2;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        p
+        {
+            font-size: 18px;
+            margin-top: 20px;
+        }
+
+        .toast-message
+        {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 1px solid #f2f2f2;
+            background-color: #121212;
+            color: #f2f2f2;
+            padding: 10px 20px;
+            border-radius: 4px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .toast-message.show
+        {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <textarea id="inputTextarea"></textarea>
+    <div style="display: flex; gap: 1rem;">
+        <!-- <button onclick="updateParagraph()">Update</button> -->
+        <!-- <button id="copyButton">Copy Message</button> -->
+        <button onclick="updateParagraph()"></button>
+        <button id="copyButton"></button>
+    </div>
+    <p id="outputParagraph"></p>
+
+    <!-- Add a container to hold the toast message -->
+    <div id="toastContainer"></div>
+    <script>
+
+        //***********************************************************************************************
+        // NOTA: Link a la extensión
+        //       https://chrome.google.com/webstore/detail/read-aloud-a-text-to-spee/hdhinadidafjejdhmfkjgnolgimiaplp
+        //
+        // Voz - Microsoft Tomas Online (Natural) - Spanish (Argentina)
+        //
+        // Uso esperado: 
+        //               Automáticamente hace foco en el textarea para poder tipear el mensaje que
+        //               vos quieras que el TTS lea. Apretar enter muestra el mensaje listo para leer.
+        //
+        //               Luego con ejecutar la extensión solamente va a leer solo ese texto.
+        //
+        //               Es recomendable asignar un atajo de teclado a la extensión tanto para iniciar
+        //               como para parar, por si se ejecuta la extensión muy cerca del momento de cargar
+        //               un nuevo mensaje.
+        //************************************************************************************************
+
+        // Add focus to the textarea on page load
+        window.addEventListener('DOMContentLoaded', function()
+        {
+            document.getElementById('inputTextarea').focus();
+        });
+
+        const inputText = document.getElementById('inputTextarea');
+        inputText.addEventListener('keyup', handleKeyUp);
+
+        const outputParagraph = document.getElementById('outputParagraph');
+
+        function updateParagraph()
+        {
+            outputParagraph.textContent = inputText.value;
+            inputText.value = ''; // Clear textarea
+        }
+
+        function handleKeyUp(event)
+        {
+            if (event.key === 'Enter')
+            {
+                event.preventDefault(); // Prevent the default behavior of Enter key
+                updateParagraph();
+            }
+        }
+
+        const copyButton = document.getElementById('copyButton');
+
+        copyButton.addEventListener('click', function()
+        {
+            const auxTextarea = document.createElement('textarea'); // I create an auxiliary textarea element
+            auxTextarea.value = outputParagraph.textContent;             // so I can use the select() method.
+            document.body.appendChild(auxTextarea);
+            auxTextarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(auxTextarea);                 // After using it, I just remove it :)
+
+            // Create toast message element
+            const toastMessage = document.createElement('div');
+            toastMessage.classList.add('toast-message');
+            toastMessage.textContent = `Text copied to clipboard: ${outputParagraph.textContent}`;
+
+            // Add toast message to container
+            const toastContainer = document.getElementById('toastContainer');
+            toastContainer.appendChild(toastMessage);
+            toastMessage.classList.add('show');
+
+            // Remove toast message after 3 seconds
+            setTimeout(function() { toastContainer.removeChild(toastMessage); }, 3000);
+        });
+    </script>
+</body>
+</html>
+
+<!--    TO-DO LIST
+
+    -   When pressing enter, make sure that textarea is not blank before trigerring event
+
+    -   Create a log of previous messages to quickly copy them to clipboard.
+
+-->
